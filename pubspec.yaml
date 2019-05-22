@@ -1,8 +1,8 @@
 name: tillhub_sdk_flutter
 description: A new Flutter package project.
 version: 0.0.1
-author:
-homepage:
+author: Robert Jefe Lindstaedt<robert.lindstaedt@gmail.com>
+homepage: https://tillhub.de
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
