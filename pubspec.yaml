@@ -1,6 +1,6 @@
 name: tillhub_sdk_flutter
 description: Flutter SDK for the Tillhub API and common local functionality.
-version: 0.0.1
+version: 0.0.2
 author: Robert Jefe Lindstaedt<robert.lindstaedt@gmail.com>
 homepage: https://tillhub.de
 
