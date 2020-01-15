@@ -51,7 +51,9 @@ class DeviceApi {
     this.authInfo = authInfo;
 
     if (!skipSave) {
-      sharedPreferences.setString(_authKey, jsonEncode(authInfo.toJson()));
+      // don't stringify if null
+      String json = authInfo == null ? null : jsonEncode(authInfo.toJson());
+      sharedPreferences.setString(_authKey, json);
     }
 
     String authorization;
