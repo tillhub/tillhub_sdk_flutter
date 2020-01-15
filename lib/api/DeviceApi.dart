@@ -4,9 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tillhub_sdk_flutter/routes/BaseRoute.dart';
-import 'package:tillhub_sdk_flutter/routes/DevicesRoute.dart';
-import 'package:tillhub_sdk_flutter/utils/DeviceAuthInfo.dart';
+import 'package:tillhub_sdk_flutter/api/DeviceAuthInfo.dart';
+import 'package:tillhub_sdk_flutter/api/routes/BaseRoute.dart';
+import 'package:tillhub_sdk_flutter/api/routes/DevicesRoute.dart';
 import 'package:tillhub_sdk_flutter/utils/Pather.dart';
 import 'package:tillhub_sdk_flutter/utils/Utils.dart';
 

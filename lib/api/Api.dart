@@ -4,13 +4,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'routes/BaseRoute.dart';
-import 'routes/DevicesRoute.dart';
-import 'routes/StocksRoute.dart';
-import 'utils/AuthInfo.dart';
-import 'utils/Pather.dart';
-import 'utils/Utils.dart';
+import 'package:tillhub_sdk_flutter/api/AuthInfo.dart';
+import 'package:tillhub_sdk_flutter/api/routes/BaseRoute.dart';
+import 'package:tillhub_sdk_flutter/api/routes/DevicesRoute.dart';
+import 'package:tillhub_sdk_flutter/api/routes/StocksRoute.dart';
+import 'package:tillhub_sdk_flutter/utils/Pather.dart';
+import 'package:tillhub_sdk_flutter/utils/Utils.dart';
 
 const _AUTHKEY = 'TillhubSdk/authInfo';
 

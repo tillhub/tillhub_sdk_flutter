@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tillhub_sdk_flutter/Api.dart';
-import 'package:tillhub_sdk_flutter/DeviceApi.dart';
+import 'package:tillhub_sdk_flutter/api/Api.dart';
+import 'package:tillhub_sdk_flutter/api/DeviceApi.dart';
 
 const bool _isProduction = bool.fromEnvironment('dart.vm.product');
 const String _productionUrl = 'https://api.tillhub.com';
