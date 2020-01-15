@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tillhub_sdk_flutter/Api.dart';
-import 'package:tillhub_sdk_flutter/DeviceApi.dart';
+import 'package:tillhub_sdk_flutter/api/api.dart';
+import 'package:tillhub_sdk_flutter/api/device_api.dart';
 
 const bool _isProduction = bool.fromEnvironment('dart.vm.product');
 const String _productionUrl = 'https://api.tillhub.com';
@@ -12,7 +12,7 @@ const String _stagingUrl = 'https://staging-api.tillhub.com';
 /// [Api] is used to interact with the backend as a user,
 /// while [DeviceApi] is used to interact with the backend as a device.
 class TillhubSdk {
-  static TillhubSdk _instance;
+  static Future<TillhubSdk> _instance;
 
   Api api;
   DeviceApi deviceApi;
@@ -21,25 +21,26 @@ class TillhubSdk {
   TillhubSdk._(this.api, this.deviceApi);
 
   /// Returns an instance of the Tillhub SDK.
-  static Future<TillhubSdk> getInstance() async {
-    if (_instance == null) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      String baseUrl = _isProduction ? _productionUrl : _stagingUrl;
-
-      Api api = Api(
-        baseUrl: baseUrl,
-        sharedPreferences: prefs,
-      );
-      DeviceApi deviceApi = DeviceApi(
-        baseUrl: baseUrl,
-        sharedPreferences: prefs,
-      );
-
-      _instance = TillhubSdk._(api, deviceApi);
-    }
-
+  static Future<TillhubSdk> getInstance() {
+    _instance ??= _createInstance();
     return _instance;
+  }
+
+  static Future<TillhubSdk> _createInstance() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String baseUrl = _isProduction ? _productionUrl : _stagingUrl;
+
+    var api = Api(
+      baseUrl: baseUrl,
+      sharedPreferences: prefs,
+    );
+    var deviceApi = DeviceApi(
+      baseUrl: baseUrl,
+      sharedPreferences: prefs,
+    );
+
+    return TillhubSdk._(api, deviceApi);
   }
 
   /// Strips [api] and [deviceApi] from its authentication information.

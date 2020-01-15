@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:tillhub_sdk_flutter/utils/Pather.dart';
+import 'package:tillhub_sdk_flutter/utils/pather.dart';
 
-import 'BaseRoute.dart';
+import 'base_route.dart';
 
 /// Extension of [BaseRoute] offering features specific for the 'stock' route
 class StocksRoute extends BaseRoute {

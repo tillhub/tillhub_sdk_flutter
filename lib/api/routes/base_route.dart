@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:tillhub_sdk_flutter/utils/Pather.dart';
-import 'package:tillhub_sdk_flutter/utils/Utils.dart';
+import 'package:tillhub_sdk_flutter/utils/pather.dart';
+import 'package:tillhub_sdk_flutter/utils/utils.dart';
 
 /// A basic route implementation offering CRUD functions.
 class BaseRoute {
