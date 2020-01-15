@@ -4,13 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tillhub_sdk_flutter/api/DeviceAuthInfo.dart';
-import 'package:tillhub_sdk_flutter/api/routes/BaseRoute.dart';
-import 'package:tillhub_sdk_flutter/api/routes/DevicesRoute.dart';
-import 'package:tillhub_sdk_flutter/utils/Pather.dart';
-import 'package:tillhub_sdk_flutter/utils/Utils.dart';
+import 'package:tillhub_sdk_flutter/api/device_auth_info.dart';
+import 'package:tillhub_sdk_flutter/api/routes/base_route.dart';
+import 'package:tillhub_sdk_flutter/api/routes/devices_route.dart';
+import 'package:tillhub_sdk_flutter/utils/pather.dart';
+import 'package:tillhub_sdk_flutter/utils/utils.dart';
 
-const _AUTHKEY = 'TillhubSdk/deviceAuthInfo';
+const _authKey = 'TillhubSdk/deviceAuthInfo';
 
 /// Abstraction layer for the Tillhub API
 ///
@@ -32,7 +32,7 @@ class DeviceApi {
     @required this.sharedPreferences,
   }) {
     try {
-      String rawAuthInfo = sharedPreferences.getString(_AUTHKEY);
+      String rawAuthInfo = sharedPreferences.getString(_authKey);
       if (rawAuthInfo != null) {
         setAuth(DeviceAuthInfo.fromJson(jsonDecode(rawAuthInfo)),
             skipSave: true);
@@ -51,7 +51,7 @@ class DeviceApi {
     this.authInfo = authInfo;
 
     if (!skipSave) {
-      sharedPreferences.setString(_AUTHKEY, jsonEncode(authInfo.toJson()));
+      sharedPreferences.setString(_authKey, jsonEncode(authInfo.toJson()));
     }
 
     String authorization;
