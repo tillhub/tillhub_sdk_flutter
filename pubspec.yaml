@@ -1,23 +1,29 @@
 name: tillhub_sdk_flutter
-description: Flutter SDK for the Tillhub API and common local functionality.
-version: 0.0.2
-author: Robert Jefe Lindstaedt<robert.lindstaedt@gmail.com>
-homepage: https://tillhub.de
+description: A new Flutter package project.
+version: 0.0.1
+author:
+homepage:
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.3.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  dio: ^2.1.5
+  logging: ^0.11.3+2
+  dio: ^3.0.8
+  dio_retry: ^0.1.9-beta
+  device_id: ^0.2.0
+  connectivity: ^0.4.2
+  shared_preferences: ^0.5.0
+  jaguar_jwt: ^2.1.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 # For information on the generic Dart part of this file, see the
-# following page: https://www.dartlang.org/tools/pub/pubspec
+# following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
