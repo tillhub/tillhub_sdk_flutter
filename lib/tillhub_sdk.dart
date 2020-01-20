@@ -43,6 +43,10 @@ class TillhubSdk {
     return TillhubSdk._(api, deviceApi);
   }
 
+  static void clearInstance() {
+    _instance = null;
+  }
+
   /// Strips [api] and [deviceApi] from its authentication information.
   void clearAuth() {
     api.setAuth(null);
