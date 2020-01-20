@@ -32,6 +32,8 @@ class Api {
       String rawAuthInfo = sharedPreferences.getString(_authKey);
       if (rawAuthInfo != null) {
         setAuth(AuthInfo.fromJson(jsonDecode(rawAuthInfo)), skipSave: true);
+      } else {
+        setAuth(null);
       }
     } catch (e, s) {
       logger.info('failed to load auth info from SharedPreferences.', e, s);
@@ -82,7 +84,7 @@ class Api {
     logger.finest('login');
 
     Response<Map<String, dynamic>> response;
-    if (organisation == null || organisation.isEmpty) {
+    if (organisation == null) {
       response = await dio.post<Map<String, dynamic>>(
         '/api/v0/users/login',
         data: {

@@ -36,6 +36,8 @@ class DeviceApi {
       if (rawAuthInfo != null) {
         setAuth(DeviceAuthInfo.fromJson(jsonDecode(rawAuthInfo)),
             skipSave: true);
+      } else {
+        setAuth(null);
       }
     } catch (e, s) {
       logger.info('failed to load auth info from SharedPreferences.', e, s);
