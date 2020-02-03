@@ -4,16 +4,16 @@ typedef Future<ResponseBody> OnFetch(RequestOptions options,
     Stream<List<int>> requestStream, Future cancelFuture);
 
 class MockAdapter extends HttpClientAdapter {
-  final Map<String, Map<Uri, OnFetch>> routes = {
-    'GET': <Uri, OnFetch>{},
-    'POST': <Uri, OnFetch>{},
-    'PATCH': <Uri, OnFetch>{},
-    'PUT': <Uri, OnFetch>{},
-    'DELETE': <Uri, OnFetch>{},
+  final Map<String, Map<String, OnFetch>> routes = {
+    'GET': <String, OnFetch>{},
+    'POST': <String, OnFetch>{},
+    'PATCH': <String, OnFetch>{},
+    'PUT': <String, OnFetch>{},
+    'DELETE': <String, OnFetch>{},
   };
 
-  void on(String method, Uri path, OnFetch handler) {
-    routes[method][path] = handler;
+  void on(String method, String url, OnFetch handler) {
+    routes[method][url] = handler;
   }
 
   void clear() {
@@ -23,11 +23,19 @@ class MockAdapter extends HttpClientAdapter {
   @override
   Future<ResponseBody> fetch(RequestOptions options,
       Stream<List<int>> requestStream, Future cancelFuture) async {
+    // for some reason, target uri contains '?' even when no query is present
+    // removing it if it's the last character, to make creating tests easier
+    Uri uri = options.uri;
+    String formattedUrl = uri.toString();
+    if (formattedUrl.endsWith('?')) {
+      formattedUrl = formattedUrl.substring(0, formattedUrl.length - 1);
+    }
+
     try {
-      var onFetch = routes[options.method][options.uri];
+      var onFetch = routes[options.method][formattedUrl];
       if (onFetch == null) {
         throw new Exception(
-            'no handler defined for route (${options.method}) ${options.path}');
+            'no handler defined for route (${options.method}) $formattedUrl');
       }
 
       return await onFetch(options, requestStream, cancelFuture);
