@@ -4,19 +4,36 @@ typedef Future<ResponseBody> OnFetch(RequestOptions options,
     Stream<List<int>> requestStream, Future cancelFuture);
 
 class MockAdapter extends HttpClientAdapter {
-  final OnFetch onFetch;
+  final Map<String, Map<Uri, OnFetch>> routes = {
+    'GET': <Uri, OnFetch>{},
+    'POST': <Uri, OnFetch>{},
+    'PATCH': <Uri, OnFetch>{},
+    'PUT': <Uri, OnFetch>{},
+    'DELETE': <Uri, OnFetch>{},
+  };
 
-  MockAdapter(this.onFetch);
+  void on(String method, Uri path, OnFetch handler) {
+    routes[method][path] = handler;
+  }
+
+  void clear() {
+    routes.values.forEach((map) => map.clear());
+  }
 
   @override
   Future<ResponseBody> fetch(RequestOptions options,
       Stream<List<int>> requestStream, Future cancelFuture) async {
     try {
+      var onFetch = routes[options.method][options.uri];
+      if (onFetch == null) {
+        throw new Exception(
+            'no handler defined for route (${options.method}) ${options.path}');
+      }
+
       return await onFetch(options, requestStream, cancelFuture);
     } catch (e) {
       print(e);
-      // return unexpected error code
-      return ResponseBody.fromString("", 666);
+      return ResponseBody.fromString('$e', 666);
     }
   }
 
