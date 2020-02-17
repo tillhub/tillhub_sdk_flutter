@@ -1,17 +1,12 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tillhub_sdk_flutter/api/auth_info.dart';
 import 'package:tillhub_sdk_flutter/api/routes/base_route.dart';
 import 'package:tillhub_sdk_flutter/api/routes/devices_route.dart';
 import 'package:tillhub_sdk_flutter/api/routes/stocks_route.dart';
 import 'package:tillhub_sdk_flutter/utils/pather.dart';
 import 'package:tillhub_sdk_flutter/utils/utils.dart';
-
-const _authKey = 'TillhubSdk/authInfo';
 
 /// Abstraction layer for the Tillhub API
 ///
@@ -20,47 +15,13 @@ const _authKey = 'TillhubSdk/authInfo';
 class Api {
   static final Logger logger = Logger('Api');
   Dio dio;
-  AuthInfo authInfo;
+  final AuthInfo authInfo;
   final String baseUrl;
-  final SharedPreferences sharedPreferences;
 
   Api({
     @required this.baseUrl,
-    @required this.sharedPreferences,
+    this.authInfo,
   }) {
-    try {
-      String rawAuthInfo = sharedPreferences.getString(_authKey);
-      if (rawAuthInfo != null) {
-        setAuth(AuthInfo.fromJson(jsonDecode(rawAuthInfo)), skipSave: true);
-      }
-    } catch (e, s) {
-      logger.info('failed to load auth info from SharedPreferences.', e, s);
-    }
-  }
-
-  BaseRoute get branches => _genRoute('v0', 'branches');
-  BaseRoute get processes => _genRoute('v0', 'processes');
-  BaseRoute get staff => _genRoute('v0', 'staff');
-
-  BaseRoute get products => _genRoute('v1', 'products');
-  BaseRoute get registers => _genRoute('v1', 'registers');
-  StocksRoute get stocks => StocksRoute(dio, _getUserId());
-  DevicesRoute get devices => DevicesRoute(dio, _getUserId());
-
-  /// Sets the authentication information to be used in future requests.
-  ///
-  /// Use [skipSave] if saving them in SharedPreferences is undesired.
-  setAuth(AuthInfo authInfo, {bool skipSave = false}) {
-    logger.finest('setAuth: $authInfo, skipSave: $skipSave');
-
-    this.authInfo = authInfo;
-
-    if (!skipSave) {
-      // don't stringify if null
-      String json = authInfo == null ? null : jsonEncode(authInfo.toJson());
-      sharedPreferences.setString(_authKey, json);
-    }
-
     dio = Dio(BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: 5000,
@@ -74,15 +35,24 @@ class Api {
     dio.interceptors.add(getInfiniteRetriesInterceptor(dio));
   }
 
+  BaseRoute get branches => _genRoute('v0', 'branches');
+  BaseRoute get processes => _genRoute('v0', 'processes');
+  BaseRoute get staff => _genRoute('v0', 'staff');
+
+  BaseRoute get products => _genRoute('v1', 'products');
+  BaseRoute get registers => _genRoute('v1', 'registers');
+  StocksRoute get stocks => StocksRoute(dio, _getUserId());
+  DevicesRoute get devices => DevicesRoute(dio, _getUserId());
+
   /// Logs the user into a new session.
   ///
   /// Automatically calls [setAuth], so you don't have to.
-  Future<void> login(String name, String password,
+  Future<AuthInfo> login(String name, String password,
       [String organisation]) async {
     logger.finest('login');
 
     Response<Map<String, dynamic>> response;
-    if (organisation == null || organisation.isEmpty) {
+    if (organisation == null) {
       response = await dio.post<Map<String, dynamic>>(
         '/api/v0/users/login',
         data: {
@@ -103,18 +73,22 @@ class Api {
 
     BaseRoute.logResponse(response);
 
-    AuthInfo aInfo = AuthInfo.fromJson(response.data);
-    setAuth(aInfo);
+    return AuthInfo.fromJson(response.data);
   }
-
-  /// Logs the user out of the current session.
-  void logout() {
-    setAuth(null);
-  } // not sure if needed
 
   /// Returns true if authentication information exists that is not expired, false otherwise.
   bool isAuthenticated() {
-    if (authInfo == null) return false;
+    try {
+      checkAuth(authInfo);
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  static void checkAuth(AuthInfo authInfo) {
+    if (authInfo == null) throw new Exception('AuthInfo is null');
 
     int expireDate;
 
@@ -122,16 +96,15 @@ class Api {
       var jwt = parseJwt(authInfo.token);
       expireDate = jwt['exp'];
     } catch (e) {
-      print(e);
+      throw new Exception('Failed to parse AuthInfo token: $e');
     }
 
-    // null implies failed parsing or missing auth token
-    if (expireDate == null) return false;
+    // expiration date, so token is still valid
+    if (expireDate == null) return;
 
     // expireDate is in the past
-    if (expireDate <= DateTime.now().millisecondsSinceEpoch) return false;
-
-    return true;
+    if (expireDate <= DateTime.now().millisecondsSinceEpoch)
+      throw new Exception('AuthInfo expired (date: $expireDate)');
   }
 
   /// Calls the /me route and returns the result.
@@ -147,15 +120,11 @@ class Api {
     return results[0];
   }
 
-  _genRoute(String version, String type) {
-    if (authInfo == null) throw Exception('Client is not authenticated!');
-
+  BaseRoute _genRoute(String version, String type) {
     return BaseRoute(dio, Pather(version, type, _getUserId()));
   }
 
   String _getUserId() {
-    String id = authInfo?.user?.legacy_id ?? authInfo?.user?.id;
-    if (id == null) throw new Exception('missing authInfo or legacy_id/id');
-    return id;
+    return authInfo?.user?.legacy_id ?? authInfo?.user?.id;
   }
 }

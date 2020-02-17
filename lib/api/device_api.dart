@@ -1,16 +1,11 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tillhub_sdk_flutter/api/device_auth_info.dart';
 import 'package:tillhub_sdk_flutter/api/routes/base_route.dart';
 import 'package:tillhub_sdk_flutter/api/routes/devices_route.dart';
 import 'package:tillhub_sdk_flutter/utils/pather.dart';
 import 'package:tillhub_sdk_flutter/utils/utils.dart';
-
-const _authKey = 'TillhubSdk/deviceAuthInfo';
 
 /// Abstraction layer for the Tillhub API
 ///
@@ -25,37 +20,11 @@ class DeviceApi {
   Dio dio;
   DeviceAuthInfo authInfo;
   final String baseUrl;
-  final SharedPreferences sharedPreferences;
 
   DeviceApi({
     @required this.baseUrl,
-    @required this.sharedPreferences,
+    this.authInfo,
   }) {
-    try {
-      String rawAuthInfo = sharedPreferences.getString(_authKey);
-      if (rawAuthInfo != null) {
-        setAuth(DeviceAuthInfo.fromJson(jsonDecode(rawAuthInfo)),
-            skipSave: true);
-      }
-    } catch (e, s) {
-      logger.info('failed to load auth info from SharedPreferences.', e, s);
-    }
-  }
-
-  /// Sets the authentication information to be used in future requests.
-  ///
-  /// Use [skipSave] if saving them in SharedPreferences is undesired.
-  setAuth(DeviceAuthInfo authInfo, {bool skipSave = false}) {
-    logger.finest('setAuth: $authInfo, skipSave: $skipSave');
-
-    this.authInfo = authInfo;
-
-    if (!skipSave) {
-      // don't stringify if null
-      String json = authInfo == null ? null : jsonEncode(authInfo.toJson());
-      sharedPreferences.setString(_authKey, json);
-    }
-
     String authorization;
     if (authInfo?.authed_token != null) {
       authorization = 'Bearer ${authInfo.authed_token}';
@@ -107,7 +76,17 @@ class DeviceApi {
 
   /// Returns true if authentication information exists that is not expired, false otherwise.
   bool isAuthenticated() {
-    if (authInfo == null) return false;
+    try {
+      checkAuth(authInfo);
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  static void checkAuth(DeviceAuthInfo authInfo) {
+    if (authInfo == null) throw new Exception('DeviceAuthInfo is null');
 
     int expireDate;
 
@@ -115,15 +94,14 @@ class DeviceApi {
       var jwt = parseJwt(authInfo.authed_token);
       expireDate = jwt['exp'];
     } catch (e) {
-      print(e);
+      throw new Exception('Failed to parse DeviceAuthInfo token: $e');
     }
 
-    // null implies failed parsing or missing auth token
-    if (expireDate == null) return false;
+    // expiration date, so token is still valid
+    if (expireDate == null) return;
 
     // expireDate is in the past
-    if (expireDate <= DateTime.now().millisecondsSinceEpoch) return false;
-
-    return true;
+    if (expireDate <= DateTime.now().millisecondsSinceEpoch)
+      throw new Exception('DeviceAuthInfo expired (date: $expireDate)');
   }
 }
