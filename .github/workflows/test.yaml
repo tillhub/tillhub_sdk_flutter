@@ -1,0 +1,26 @@
+name: Test
+
+on: push
+
+jobs:
+  run-tests:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test --coverage
+      - uses: devmasx/coverage-check-action@v1.1.0
+        with:
+          type: lcov
+          result_path: coverage/lcov.info
+          min_coverage: 50
+          token: ${{secrets.GITHUB_TOKEN}}
+      - uses: axel-op/dart-package-analyzer@stable
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
