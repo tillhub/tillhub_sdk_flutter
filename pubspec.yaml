@@ -1,6 +1,6 @@
 name: tillhub_sdk_flutter
 description: The Tillhub SDK for Flutter
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/tillhub/tillhub_sdk_flutter
 
 environment:
