@@ -91,6 +91,7 @@ T safeGet<T>(Object json, String path) {
 /// Parses a given JWT and returns a map with the properties encoded inside.
 ///
 /// [token] must be a base64 encoded String that contains exactly 3 periods. Throws error otherwise.
+/// Based on https://stackoverflow.com/a/52021206/584292
 Map<String, dynamic> parseJwt(String token) {
   final parts = token.split('.');
   if (parts.length != 3) {
@@ -106,6 +107,8 @@ Map<String, dynamic> parseJwt(String token) {
   return payloadMap;
 }
 
+/// Decodes JWT payload
+/// Taken from https://stackoverflow.com/a/56900065/584292
 String _getJsonFromJWT(String splittedToken) {
   String normalizedSource = base64Url.normalize(splittedToken);
   return utf8.decode(base64Url.decode(normalizedSource));
